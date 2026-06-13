@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytest-nijam"
+version = "0.1.0a1"
+description = "pytest plugin for Nijam — captures test runs and ships them to the Nijam API."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [{ name = "Nijam" }]
+keywords = ["pytest", "nijam", "test-analytics", "reporting", "ci"]
+classifiers = [
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Testing",
+]
+# Zero runtime dependencies. pytest is the host — declared so resolvers know the
+# minimum, but the plugin only ever loads inside a pytest process anyway.
+dependencies = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://nijam.dev"
+Documentation = "https://docs.nijam.dev"
+Source = "https://github.com/getnijam/pytest-reporter"
+
+# This entry point is what makes pytest auto-discover and load the plugin.
+[project.entry-points.pytest11]
+nijam = "nijam_pytest.plugin"
+
+[project.optional-dependencies]
+dev = ["mypy>=1.8", "ruff>=0.5"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nijam_pytest"]
+
+[tool.mypy]
+strict = true
+files = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

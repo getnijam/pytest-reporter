@@ -1,0 +1,113 @@
+name: Publish
+
+# One-click release for pytest-nijam:
+#   set version (in pyproject + __init__) → verify → guard → build → publish to PyPI
+#   via Trusted Publishing (OIDC, no token) → commit + tag (vX.Y.Z) → push.
+# Run it from the Actions tab: "Publish" → "Run workflow", enter the new version.
+#
+# No secret needed. Set up Trusted Publishing once on PyPI BEFORE the first run:
+#   PyPI → (project, or "Your projects → Publishing" for a *pending* publisher) →
+#   Add a publisher: owner = getnijam, repo = pytest-reporter,
+#   workflow = publish.yml, environment = pypi.
+# A pending publisher lets the first run create the project. Also create a GitHub
+# environment named "pypi" (Settings → Environments) — optionally gated by reviewers.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'New version (PEP 440 — e.g. 0.1.0a2, 0.1.0, 1.0.0)'
+        type: string
+        required: true
+
+permissions:
+  contents: write # push the version-bump commit + tag
+  id-token: write # PyPI Trusted Publishing (OIDC)
+
+# Never let two publishes overlap.
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Must match the environment named in the PyPI trusted-publisher config.
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so the bump commit + tag push cleanly
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      # Validate BEFORE bumping/publishing anything.
+      - name: Validate (lint + types)
+        run: |
+          pip install -e '.[dev]'
+          ruff check src
+          mypy
+
+      # Write the requested version into pyproject.toml + __init__ (kept in sync).
+      - name: Set version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          python - <<'PY'
+          import os, re, pathlib
+          v = os.environ["VERSION"].strip()
+          if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+([abrc][0-9]+|rc[0-9]+|\.dev[0-9]+|\.post[0-9]+)?", v):
+              raise SystemExit(f"::error::'{v}' is not a PEP 440 version")
+          targets = [
+              ("pyproject.toml", r'(?m)^version = ".*"$', f'version = "{v}"'),
+              ("src/nijam_pytest/__init__.py", r'(?m)^__version__ = ".*"$', f'__version__ = "{v}"'),
+          ]
+          for path, pat, repl in targets:
+              p = pathlib.Path(path)
+              s = p.read_text()
+              s2, n = re.subn(pat, repl, s, count=1)
+              if n != 1:
+                  raise SystemExit(f"::error::could not set version in {path}")
+              p.write_text(s2)
+          print(f"version set to {v}")
+          PY
+
+      # Guard: this version must not already be published (PyPI rejects re-uploads).
+      - name: Guard — version not already on PyPI
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/pytest-nijam/$VERSION/json")
+          if [ "$code" = "200" ]; then
+            echo "::error::pytest-nijam $VERSION is already on PyPI — bump again."
+            exit 1
+          fi
+          echo "OK — $VERSION is not on PyPI yet (HTTP $code)."
+
+      - name: Build
+        run: |
+          pip install build twine
+          python -m build
+          twine check dist/*
+
+      # Trusted Publishing: no password — authenticates via OIDC (id-token: write)
+      # against the PyPI publisher you configured for this repo + environment.
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      # Record the release in git only AFTER PyPI accepted it (publish is the one
+      # irreversible step). Pushes to the branch the workflow was dispatched from.
+      - name: Commit + tag the release
+        env:
+          VERSION: ${{ inputs.version }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git commit -am "release: v$VERSION"
+          git tag "v$VERSION"
+          git push origin "HEAD:$BRANCH"
+          git push origin "v$VERSION"
