@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytest-nijam"
-version = "0.1.0a1"
+version = "0.1.0"
 description = "pytest plugin for Nijam, captures test runs and ships them to the Nijam API."
 readme = "README.md"
 license = "MIT"
