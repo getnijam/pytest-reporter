@@ -1,10 +1,10 @@
 # pytest-nijam
 
-pytest plugin for [Nijam](https://nijam.dev) — captures your test runs and ships them
+pytest plugin for [Nijam](https://nijam.dev), captures your test runs and ships them
 to the Nijam dashboard so you can track what failed, why, and where (error log +
 failing line), across CI runs and over time.
 
-> pytest has no traces, so — unlike the Playwright reporter — runs won't include a
+> pytest has no traces, so, unlike the Playwright reporter, runs won't include a
 > trace viewer. Everything else (failures, error output, the failing line, durations,
 > and your test source) is captured.
 
@@ -19,7 +19,7 @@ The plugin auto-activates once installed (via pytest's `pytest11` entry point).
 ## Configure
 
 Add your project ID to `pytest.ini` (or `pyproject.toml`), and provide the ingest API
-key via an environment variable (it's a secret — keep it out of source control):
+key via an environment variable (it's a secret, keep it out of source control):
 
 ```ini
 # pytest.ini
@@ -45,16 +45,16 @@ environment variable; **the environment variable wins** when both are set.
 
 | ini option            | env var               | default                  | what it does                                                        |
 | --------------------- | --------------------- | ------------------------ | ------------------------------------------------------------------- |
-| `nijam_api_key`       | `NIJAM_API_KEY`       | —                        | Ingest API key (required).                                          |
-| `nijam_project_id`    | `NIJAM_PROJECT_ID`    | —                        | Project UUID (required).                                            |
+| `nijam_api_key`       | `NIJAM_API_KEY`       |,                        | Ingest API key (required).                                          |
+| `nijam_project_id`    | `NIJAM_PROJECT_ID`    |,                        | Project UUID (required).                                            |
 | `nijam_api_url`       | `NIJAM_API_URL`       | `https://api.nijam.dev`  | API base URL.                                                       |
-| `nijam_environment`   | `NIJAM_ENVIRONMENT`   | —                        | Free-form environment tag (e.g. `staging`).                         |
-| `nijam_upload_source` | —                     | `true`                   | Upload each test file's source so the dashboard can show it.        |
+| `nijam_environment`   | `NIJAM_ENVIRONMENT`   |,                        | Free-form environment tag (e.g. `staging`).                         |
+| `nijam_upload_source` |,                     | `true`                   | Upload each test file's source so the dashboard can show it.        |
 | `nijam_auto_complete` | `NIJAM_AUTO_COMPLETE` | `true`                   | Finalize the run when this process ends. Set `false` for fan-out.   |
-| `nijam_silent`        | —                     | `false`                  | Suppress `[nijam]` log lines.                                       |
+| `nijam_silent`        |,                     | `false`                  | Suppress `[nijam]` log lines.                                       |
 
 If `nijam_api_key` or `nijam_project_id` is missing, the plugin disables itself with a
-single warning — your tests run exactly as before.
+single warning, your tests run exactly as before.
 
 ## CI metadata
 
@@ -72,7 +72,7 @@ See the [docs](https://docs.nijam.dev/reporter/pytest/).
 ## Guarantees
 
 This plugin **never breaks your test run.** Every hook is fail-soft: a network error, a
-bad key, or an unreachable API produces a `[nijam]` warning and nothing more — your tests
+bad key, or an unreachable API produces a `[nijam]` warning and nothing more, your tests
 still pass or fail on their own merits.
 
 ## License

@@ -4,7 +4,7 @@ Golden rule (ported from pw-reporter): NEVER raise from a hook. Every hook body 
 wrapped in try/except; on any failure we log a `[nijam]` warning and continue (or
 no-op the run). The plugin must never break a user's test session.
 
-pytest has no traces, so — unlike the Playwright reporter — there is no artifact
+pytest has no traces, so, unlike the Playwright reporter, there is no artifact
 upload path. We still capture the error log (`longrepr`), the failing line, duration,
 and (opt-in) the test file's source, which is everything the dashboard needs.
 """
@@ -146,7 +146,7 @@ class NijamPlugin:
 
         if not api_key or not self._project_id:
             missing = "nijam_api_key" if not api_key else "nijam_project_id"
-            log.warn(f"missing {missing} — reporter disabled. See {SETUP_DOCS}")
+            log.warn(f"missing {missing}, reporter disabled. See {SETUP_DOCS}")
             return
 
         self._client = NijamClient(api_key, api_url)
@@ -177,7 +177,7 @@ class NijamPlugin:
             url = created.get("url")
             self._run_url = str(url) if url else None
             if self._run_url:
-                log.info(f"run started — view it at {self._run_url}")
+                log.info(f"run started, view it at {self._run_url}")
             else:
                 log.info(f"run started ({self._run_id})")
         except Exception as err:
@@ -201,7 +201,7 @@ class NijamPlugin:
                 self._upload_sources()
 
             if not self._auto_complete:
-                log.info("this job done — complete the run via your post-matrix step")
+                log.info("this job done, complete the run via your post-matrix step")
                 if self._run_url:
                     log.info(f"view the run at {self._run_url}")
                 return
@@ -215,7 +215,7 @@ class NijamPlugin:
                     stats=stats,
                 ),
             )
-            suffix = f" — view it at {self._run_url}" if self._run_url else ""
+            suffix = f", view it at {self._run_url}" if self._run_url else ""
             log.info(f"run finalized ({stats.passed}/{stats.total} passed){suffix}")
         except Exception as err:
             log.warn(f"sessionfinish failed: {err}")
@@ -259,7 +259,7 @@ class NijamPlugin:
             self._source_files[file] = abs_path
 
         parts = nodeid.split("::")
-        # Drop the leading file segment from the path — the file is its own field.
+        # Drop the leading file segment from the path, the file is its own field.
         title_path = parts[1:] if len(parts) > 1 else parts
         line = lineno + 1 if isinstance(lineno, int) else None
         return _PendingTest(

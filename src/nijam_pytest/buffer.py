@@ -1,7 +1,7 @@
 """Batches test executions and flushes them in chunks.
 
 Unlike the Playwright reporter (which fire-and-forgets over the network on a worker
-thread), this buffer only *appends* during the test run — it never blocks the test
+thread), this buffer only *appends* during the test run, it never blocks the test
 path on I/O. The accumulated executions are flushed in `FLUSH_SIZE` chunks at
 `drain()` time (session finish), which keeps the hot path allocation-only and avoids
 threading complexity. pytest sessions are short-lived, so a single end-of-run flush

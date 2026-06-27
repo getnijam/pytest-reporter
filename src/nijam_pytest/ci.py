@@ -1,4 +1,4 @@
-"""CI / git metadata detection — a Python port of pw-reporter's ci.ts.
+"""CI / git metadata detection, a Python port of pw-reporter's ci.ts.
 
 Per-field resolution order: CI-specific var > generic GIT_* var > git shell-out >
 empty. Branch stays None when unknown (the dashboard renders "No Branch Info").
@@ -44,7 +44,7 @@ def _git(*args: str) -> str | None:
 
 
 def detect_git_root() -> str | None:
-    """Absolute path of the git repo root — a portable base for spec paths."""
+    """Absolute path of the git repo root, a portable base for spec paths."""
     return _git("rev-parse", "--show-toplevel")
 
 
@@ -130,7 +130,7 @@ def _detect_ci_provider() -> str | None:
 
 
 def _pr_number_from_github_ref() -> str | None:
-    """GitHub exposes no PR-number var — derive it from refs/pull/<n>/merge."""
+    """GitHub exposes no PR-number var, derive it from refs/pull/<n>/merge."""
     ref = _env.get("GITHUB_REF")
     if not ref:
         return None
@@ -201,7 +201,7 @@ def detect_run_context() -> RunContext:
         _env.get("BITBUCKET_REPO_FULL_NAME"),
     )
 
-    # Author — single git shell-out, reused for email + name.
+    # Author, single git shell-out, reused for email + name.
     git_email, git_name = _git_author()
     commit_author_name, commit_author_email = _parse_author(_env.get("CI_COMMIT_AUTHOR"))
     bitbucket_author_name, _ = _parse_author(_env.get("BITBUCKET_COMMIT_AUTHOR"))

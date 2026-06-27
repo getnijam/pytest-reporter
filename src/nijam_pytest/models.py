@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 
 
 def _compact(d: dict[str, object]) -> dict[str, object]:
-    """Drop keys whose value is None — the API treats absent and null alike, and a
+    """Drop keys whose value is None, the API treats absent and null alike, and a
     leaner body keeps the wire format close to the Playwright reporter's."""
     return {k: v for k, v in d.items() if v is not None}
 
@@ -23,7 +23,7 @@ class RunContext:
     branch: str | None = None
     prNumber: str | None = None
     ciProvider: str | None = None
-    # CI run attempt (e.g. GITHUB_RUN_ATTEMPT) — re-runs get a fresh Nijam run.
+    # CI run attempt (e.g. GITHUB_RUN_ATTEMPT), re-runs get a fresh Nijam run.
     ciRunAttempt: str | None = None
     ciRunId: str | None = None
     ciRunUrl: str | None = None
@@ -68,14 +68,14 @@ class CreateRunPayload:
 
 @dataclass
 class TestExecution:
-    """One test attempt — buffered and flushed in batches to POST …/executions.
+    """One test attempt, buffered and flushed in batches to POST …/executions.
 
     `status` is one of passed | failed | skipped (the API also accepts timedOut /
     interrupted, which pytest doesn't surface per-test). There is no `line` field for
-    runs that predate line capture — pytest provides it, so we always send it.
+    runs that predate line capture, pytest provides it, so we always send it.
     """
 
-    id: str  # client-generated uuid (PK) — mirrors the Playwright reporter
+    id: str  # client-generated uuid (PK), mirrors the Playwright reporter
     testId: str
     title: str
     titlePath: list[str]

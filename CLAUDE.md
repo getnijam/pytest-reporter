@@ -1,14 +1,14 @@
-# pytest-nijam — Claude instructions
+# pytest-nijam, Claude instructions
 
 pytest plugin for **Nijam**. Implements pytest's hooks to capture a test run and ship it
 to the Nijam API. It is the Python sibling of `@nijam/pw-reporter` and reports into the
 **same** ingestion endpoints (`/v1/runs`, `…/executions`, `…/source`, `PATCH /v1/runs/:id`).
 
-**This is a public-facing artifact** — installed via `pip`, read on GitHub, pasted into
+**This is a public-facing artifact**, installed via `pip`, read on GitHub, pasted into
 users' `pytest.ini`. Code quality, **zero runtime dependencies**, and a copy-paste-runnable
 README matter more here than anywhere else.
 
-License: **MIT** (separate from the BSL platform — must be maximally adoptable).
+License: **MIT** (separate from the BSL platform, must be maximally adoptable).
 
 > This is an independent repo (`getnijam/pytest-reporter`), not part of a monorepo. It
 > shares nothing with the other repos except the API's wire format.
@@ -16,10 +16,10 @@ License: **MIT** (separate from the BSL platform — must be maximally adoptable
 ## The one big difference from pw-reporter
 **pytest has no traces.** There is no artifact upload path at all (no trace / screenshot /
 video). We capture the error log (`longrepr`), the failing line, durations, run stats, and
-(opt-in) the test file source — everything the dashboard needs minus the trace viewer.
+(opt-in) the test file source, everything the dashboard needs minus the trace viewer.
 Projects created as `pytest` in the dashboard hide trace UI accordingly.
 
-## Stack (locked — ask before changing the public option shape)
+## Stack (locked, ask before changing the public option shape)
 - Python, `>=3.8`. `from __future__ import annotations` everywhere (3.8-safe typing).
 - **Zero runtime dependencies.** `pytest>=7` is the host. HTTP is **stdlib `urllib`** only
   (no `requests`/`httpx`).
@@ -31,9 +31,9 @@ Projects created as `pytest` in the dashboard hide trace UI accordingly.
 ```
 src/nijam_pytest/
   plugin.py   # pytest hooks (addoption/configure/sessionstart/logreport/sessionfinish)
-  client.py   # NijamClient — HTTP to the API (urllib, soft-fail)
-  ci.py       # detect_run_context / relative_file — CI/git metadata (port of pw-reporter ci.ts)
-  buffer.py   # ExecutionBuffer — collect during run, flush in chunks at session finish
+  client.py   # NijamClient, HTTP to the API (urllib, soft-fail)
+  ci.py       # detect_run_context / relative_file, CI/git metadata (port of pw-reporter ci.ts)
+  buffer.py   # ExecutionBuffer, collect during run, flush in chunks at session finish
   models.py   # payload dataclasses (RunContext, TestExecution, FinalizeRunPayload, …)
   log.py      # [nijam]-prefixed warn/info
 ```
@@ -66,15 +66,16 @@ link + disable; no further work. Don't change these names/shape without asking.
   renders "No Branch Info"). Same env-var names as pw-reporter's `ci.ts`.
 - **HTTP**: Bearer `api_key`, 30s timeout, no retries, 402 → "plan limit reached" warning.
 
-## Guard rails — do NOT
-- ❌ **Raise from any hook** — wrap every hook body in try/except, `log.warn`, continue.
+## Guard rails, do NOT
+- ❌ **Raise from any hook**, wrap every hook body in try/except, `log.warn`, continue.
   The plugin MUST NOT break a user's test run. Ever.
 - ❌ Add runtime dependencies (zero-dep goal) · use `requests`/`httpx` (stdlib `urllib` only).
-- ❌ Block the test path (`logreport`) on the network — only append to the buffer; flush at finish.
-- ❌ Add a trace/artifact upload path — pytest has no traces.
+- ❌ Block the test path (`logreport`) on the network, only append to the buffer; flush at finish.
+- ❌ Add a trace/artifact upload path, pytest has no traces.
 - ❌ Use Python-3.10-only syntax in runtime code without `from __future__ import annotations`.
 - ❌ Change the public option names/shape, or the API wire format, without asking.
-- ❌ Ternary hell / one-liners that hurt readability — prefer early returns and `if`/`else`.
+- ❌ Ternary hell / one-liners that hurt readability, prefer early returns and `if`/`else`.
+- ❌ **Em dashes (U+2014) or en dashes (U+2013) anywhere, never generate one.** Not in CLI/log output, error strings, the README, or code/comments. Use a comma, colon, parentheses, or two sentences for prose; a plain hyphen-minus for ranges, IDs, and compound words. The published package must contain zero em/en dashes.
 
 ## Build & publish
 - `pip install -e '.[dev]'` · `mypy` · `ruff check src` · smoke-test into a sample suite.

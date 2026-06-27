@@ -10,12 +10,12 @@ name: Publish
 #   Add a publisher: owner = getnijam, repo = pytest-reporter,
 #   workflow = publish.yml, environment = pypi.
 # A pending publisher lets the first run create the project. Also create a GitHub
-# environment named "pypi" (Settings → Environments) — optionally gated by reviewers.
+# environment named "pypi" (Settings → Environments), optionally gated by reviewers.
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'New version (PEP 440 — e.g. 0.1.0a2, 0.1.0, 1.0.0)'
+        description: 'New version (PEP 440, e.g. 0.1.0a2, 0.1.0, 1.0.0)'
         type: string
         required: true
 
@@ -76,16 +76,16 @@ jobs:
           PY
 
       # Guard: this version must not already be published (PyPI rejects re-uploads).
-      - name: Guard — version not already on PyPI
+      - name: Guard, version not already on PyPI
         env:
           VERSION: ${{ inputs.version }}
         run: |
           code=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/pytest-nijam/$VERSION/json")
           if [ "$code" = "200" ]; then
-            echo "::error::pytest-nijam $VERSION is already on PyPI — bump again."
+            echo "::error::pytest-nijam $VERSION is already on PyPI, bump again."
             exit 1
           fi
-          echo "OK — $VERSION is not on PyPI yet (HTTP $code)."
+          echo "OK, $VERSION is not on PyPI yet (HTTP $code)."
 
       - name: Build
         run: |
@@ -93,7 +93,7 @@ jobs:
           python -m build
           twine check dist/*
 
-      # Trusted Publishing: no password — authenticates via OIDC (id-token: write)
+      # Trusted Publishing: no password, authenticates via OIDC (id-token: write)
       # against the PyPI publisher you configured for this repo + environment.
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

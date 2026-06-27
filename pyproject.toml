@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "pytest-nijam"
 version = "0.1.0a1"
-description = "pytest plugin for Nijam — captures test runs and ships them to the Nijam API."
+description = "pytest plugin for Nijam, captures test runs and ships them to the Nijam API."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Testing",
 ]
-# Zero runtime dependencies. pytest is the host — declared so resolvers know the
+# Zero runtime dependencies. pytest is the host, declared so resolvers know the
 # minimum, but the plugin only ever loads inside a pytest process anyway.
 dependencies = ["pytest>=7.0"]
 

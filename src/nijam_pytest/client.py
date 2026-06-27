@@ -1,4 +1,4 @@
-"""HTTP client for the Nijam API — stdlib urllib only (no requests).
+"""HTTP client for the Nijam API, stdlib urllib only (no requests).
 
 Every call is soft-fail: on any error it logs a `[nijam]` warning and returns
 None/!ok. The plugin must never break a user's test run, so nothing here raises.
