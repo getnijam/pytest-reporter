@@ -31,6 +31,10 @@ Source = "https://github.com/getnijam/pytest-reporter"
 [project.entry-points.pytest11]
 nijam = "nijam_pytest.plugin"
 
+# `nijam-pytest` CLI: fetch the previous run's failed tests for a filtered re-run.
+[project.scripts]
+nijam-pytest = "nijam_pytest.cli:main"
+
 [project.optional-dependencies]
 dev = ["mypy>=1.8", "ruff>=0.5"]
 

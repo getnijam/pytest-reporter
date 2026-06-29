@@ -176,6 +176,10 @@ def detect_run_context() -> RunContext:
     )
 
     ci_run_id = _first_of(
+        # NIJAM_RUN_GROUP pins the clubbing key when retrying only failed tests on a
+        # CI that mints a new run id per attempt (set by `nijam-pytest fetch-failed`),
+        # so the retry clubs under the original run. On GitHub GITHUB_RUN_ID already does.
+        _env.get("NIJAM_RUN_GROUP"),
         _env.get("GITHUB_RUN_ID"),
         _env.get("CI_PIPELINE_ID"),  # GitLab
         _env.get("CIRCLE_BUILD_NUM"),
@@ -184,8 +188,9 @@ def detect_run_context() -> RunContext:
     )
 
     # A re-run keeps the same run id but bumps the attempt; include it so a re-run is
-    # a fresh run, not merged into the prior one.
-    ci_run_attempt = _first_of(_env.get("GITHUB_RUN_ATTEMPT"))
+    # a fresh run, not merged into the prior one. NIJAM_RUN_ATTEMPT (from fetch-failed)
+    # wins so an in-workflow retry gets a distinct attempt.
+    ci_run_attempt = _first_of(_env.get("NIJAM_RUN_ATTEMPT"), _env.get("GITHUB_RUN_ATTEMPT"))
 
     ci_run_url = _first_of(
         _github_run_url(),

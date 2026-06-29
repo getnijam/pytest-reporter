@@ -56,6 +56,8 @@ class CreateRunPayload:
     startedAt: str
     context: RunContext = field(default_factory=RunContext)
     environment: str | None = None
+    # True when this run re-ran only the previous attempt's failed tests (NIJAM_RERUN).
+    partialRerun: bool = False
 
     def to_dict(self) -> dict[str, object]:
         body = self.context.to_dict()
@@ -63,6 +65,8 @@ class CreateRunPayload:
         body["startedAt"] = self.startedAt
         if self.environment is not None:
             body["environment"] = self.environment
+        if self.partialRerun:
+            body["partialRerun"] = True
         return body
 
 

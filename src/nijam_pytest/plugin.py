@@ -26,11 +26,17 @@ from .models import CreateRunPayload, FinalizeRunPayload, RunStats, TestExecutio
 SETUP_DOCS = "https://docs.nijam.dev/reporter/pytest/"
 _SOURCE_MAX_BYTES = 256 * 1024
 _FALSEY = {"false", "0", "no", "off"}
+_TRUTHY = {"1", "true", "yes", "on"}
 
 
 def _now_iso() -> str:
     """ISO-8601 in UTC with a trailing Z (the form Zod's .datetime() accepts)."""
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _is_rerun() -> bool:
+    """Whether this run re-ran only failed tests (NIJAM_RERUN from fetch-failed)."""
+    return (os.environ.get("NIJAM_RERUN") or "").strip().lower() in _TRUTHY
 
 
 @dataclass
@@ -167,6 +173,8 @@ class NijamPlugin:
                     startedAt=self._started_at,
                     context=context,
                     environment=self._environment,
+                    # Set by `nijam-pytest fetch-failed` when this is a failed-only retry.
+                    partialRerun=_is_rerun(),
                 )
             )
             if not created:

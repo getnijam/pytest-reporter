@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import urllib.error
+import urllib.parse
 import urllib.request
 
 from . import log
@@ -51,6 +52,46 @@ class NijamClient:
             return None
         except Exception as err:  # URLError, timeout, DNS, TLS, …
             log.warn(f"{method} {url} failed: {err}")
+            return None
+
+    def _get(self, path: str) -> bytes | None:
+        """GET a path. Returns response bytes on success, else None (soft-fail)."""
+        url = f"{self._base_url}{path}"
+        req = urllib.request.Request(
+            url,
+            method="GET",
+            headers={"Authorization": f"Bearer {self._api_key}"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as res:
+                return bytes(res.read())
+        except urllib.error.HTTPError as err:
+            log.warn(f"GET {path} -> {err.code}")
+            return None
+        except Exception as err:  # URLError, timeout, DNS, TLS, …
+            log.warn(f"GET {url} failed: {err}")
+            return None
+
+    def fetch_failed_tests(
+        self, project_id: str, ci_run_id: str, attempt: int | None = None
+    ) -> dict[str, object] | None:
+        """Fetch the previous run's failed tests for a CI run (re-run only those).
+
+        Returns the parsed {runId, ciRunId, attempt, tests} or None on any failure
+        (the caller then runs the full suite).
+        """
+        query = {"ciRunId": ci_run_id}
+        if attempt is not None:
+            query["attempt"] = str(attempt)
+        qs = urllib.parse.urlencode(query)
+        raw = self._get(f"/v1/projects/{project_id}/failed-tests?{qs}")
+        if raw is None:
+            return None
+        try:
+            data: dict[str, object] = json.loads(raw)
+            return data
+        except Exception:
+            log.warn("GET /failed-tests returned an unparseable body")
             return None
 
     def create_run(self, payload: CreateRunPayload) -> dict[str, object] | None:
