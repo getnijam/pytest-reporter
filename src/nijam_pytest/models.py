@@ -30,6 +30,8 @@ class RunContext:
     repository: str | None = None
     authorEmail: str | None = None
     authorName: str | None = None
+    # Who triggered the CI run (actor login, may be a bot), distinct from the commit author.
+    triggeredBy: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return _compact(
@@ -44,6 +46,7 @@ class RunContext:
                 "repository": self.repository,
                 "authorEmail": self.authorEmail,
                 "authorName": self.authorName,
+                "triggeredBy": self.triggeredBy,
             }
         )
 
@@ -56,6 +59,8 @@ class CreateRunPayload:
     startedAt: str
     context: RunContext = field(default_factory=RunContext)
     environment: str | None = None
+    # True when this run re-ran only the previous attempt's failed tests (NIJAM_RERUN).
+    partialRerun: bool = False
 
     def to_dict(self) -> dict[str, object]:
         body = self.context.to_dict()
@@ -63,6 +68,8 @@ class CreateRunPayload:
         body["startedAt"] = self.startedAt
         if self.environment is not None:
             body["environment"] = self.environment
+        if self.partialRerun:
+            body["partialRerun"] = True
         return body
 
 

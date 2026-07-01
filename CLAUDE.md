@@ -36,6 +36,7 @@ src/nijam_pytest/
   buffer.py   # ExecutionBuffer, collect during run, flush in chunks at session finish
   models.py   # payload dataclasses (RunContext, TestExecution, FinalizeRunPayload, …)
   log.py      # [nijam]-prefixed warn/info
+  cli.py      # `nijam-pytest` console script: fetch-failed (re-run only failures)
 ```
 
 ## Public config surface (design backward from this)
@@ -65,6 +66,7 @@ link + disable; no further work. Don't change these names/shape without asking.
   GitHub/GitLab/CircleCI/Bitbucket/generic. Leave `branch` None when unknown (dashboard
   renders "No Branch Info"). Same env-var names as pw-reporter's `ci.ts`.
 - **HTTP**: Bearer `api_key`, 30s timeout, no retries, 402 → "plan limit reached" warning.
+- **Re-run only failures** (`cli.py`, `nijam-pytest` console script): `nijam-pytest fetch-failed` GETs `/v1/projects/:id/failed-tests` (ingest-key authed, identifiers only) and prints the previous run's failed **nodeids** (`pytest $(cat failed.txt)`); via `--export-env "$GITHUB_ENV"` it writes `NIJAM_RUN_GROUP`/`NIJAM_RUN_ATTEMPT`/`NIJAM_RERUN` so the retry's plugin run **clubs under the original run** and is tagged `partialRerun`. `ci.py` honors `NIJAM_RUN_GROUP`/`NIJAM_RUN_ATTEMPT`; `plugin.py` sends `partialRerun` from `NIJAM_RERUN`. The CLI reads config from **env/flags only** (no pytest ini, it runs outside pytest), uses stdlib `argparse`, and is CI-safe: a fetch failure emits nothing + exits 0 (caller's `[ -s failed.txt ]` guard runs the full suite), only bad usage exits non-zero.
 
 ## Guard rails, do NOT
 - ❌ **Raise from any hook**, wrap every hook body in try/except, `log.warn`, continue.
