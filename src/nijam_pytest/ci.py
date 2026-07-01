@@ -225,6 +225,18 @@ def detect_run_context() -> RunContext:
         git_name,
     )
 
+    # Who kicked off the CI run (the actor/triggerer), separate from the commit
+    # author above, this can be a person or a bot (scheduled runs, a re-run, a
+    # Dependabot PR). CIs expose it as a username/login, not an email;
+    # GITHUB_TRIGGERING_ACTOR is the user who actually (re-)ran the workflow.
+    triggered_by = _first_of(
+        _env.get("GITHUB_TRIGGERING_ACTOR"),
+        _env.get("GITHUB_ACTOR"),
+        _env.get("GITLAB_USER_LOGIN"),
+        _env.get("GITLAB_USER_NAME"),
+        _env.get("CIRCLE_USERNAME"),
+    )
+
     return RunContext(
         commitSha=commit_sha,
         branch=branch,
@@ -236,6 +248,7 @@ def detect_run_context() -> RunContext:
         repository=repository,
         authorEmail=author_email,
         authorName=author_name,
+        triggeredBy=triggered_by,
     )
 
 

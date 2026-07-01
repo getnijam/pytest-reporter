@@ -30,6 +30,8 @@ class RunContext:
     repository: str | None = None
     authorEmail: str | None = None
     authorName: str | None = None
+    # Who triggered the CI run (actor login, may be a bot), distinct from the commit author.
+    triggeredBy: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return _compact(
@@ -44,6 +46,7 @@ class RunContext:
                 "repository": self.repository,
                 "authorEmail": self.authorEmail,
                 "authorName": self.authorName,
+                "triggeredBy": self.triggeredBy,
             }
         )
 
