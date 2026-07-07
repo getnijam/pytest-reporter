@@ -21,7 +21,7 @@ import pytest
 from . import ci, log
 from .buffer import ExecutionBuffer
 from .client import NijamClient
-from .models import CreateRunPayload, FinalizeRunPayload, RunStats, TestExecution
+from .models import CreateRunPayload, FinalizeRunPayload, PlanRunPayload, RunStats, TestExecution
 
 SETUP_DOCS = "https://docs.nijam.dev/reporter/pytest/"
 _SOURCE_MAX_BYTES = 256 * 1024
@@ -191,6 +191,25 @@ class NijamPlugin:
         except Exception as err:
             self._enabled = False
             log.warn(f"sessionstart failed: {err}")
+
+    def pytest_collection_finish(self, session: pytest.Session) -> None:
+        # Collection is done, so we now know the whole suite. Report it up front (the
+        # run was created in sessionstart, before collection) so the dashboard shows
+        # the true total and every test file immediately, not a count that climbs.
+        if not self._enabled or not self._run_id:
+            return
+        try:
+            files: set[str] = set()
+            for item in session.items:
+                path = getattr(item, "path", None)
+                if path is not None:
+                    files.add(ci.relative_file(str(path), self._root_dir, self._git_root))
+            self._client.plan(
+                self._run_id,
+                PlanRunPayload(plannedTotal=len(session.items), plannedFiles=sorted(files)),
+            )
+        except Exception as err:
+            log.warn(f"collection_finish failed: {err}")
 
     def pytest_runtest_logreport(self, report: pytest.TestReport) -> None:
         if not self._enabled or not self._run_id:

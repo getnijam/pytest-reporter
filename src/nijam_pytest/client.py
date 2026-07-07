@@ -12,7 +12,7 @@ import urllib.parse
 import urllib.request
 
 from . import log
-from .models import CreateRunPayload, FinalizeRunPayload, TestExecution
+from .models import CreateRunPayload, FinalizeRunPayload, PlanRunPayload, TestExecution
 
 _DEFAULT_API_URL = "https://api.nijam.dev"
 _TIMEOUT_S = 30
@@ -109,6 +109,10 @@ class NijamClient:
             log.warn("POST /v1/runs returned no run id")
             return None
         return {"id": run_id, "url": data.get("url")}
+
+    def plan(self, run_id: str, payload: PlanRunPayload) -> None:
+        """Report the run's planned total + test files up front. Soft-fails like the rest."""
+        self._send("POST", f"/v1/runs/{run_id}/plan", payload.to_dict())
 
     def send_executions(self, run_id: str, executions: list[TestExecution]) -> None:
         """Flush a batch of executions. Failed flushes drop the batch (no retry)."""
