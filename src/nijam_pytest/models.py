@@ -74,6 +74,17 @@ class CreateRunPayload:
 
 
 @dataclass
+class PlanRunPayload:
+    """Body for POST /v1/runs/:id/plan, the suite reported up front."""
+
+    plannedTotal: int
+    plannedFiles: list[str]
+
+    def to_dict(self) -> dict[str, object]:
+        return {"plannedTotal": self.plannedTotal, "plannedFiles": self.plannedFiles}
+
+
+@dataclass
 class TestExecution:
     """One test attempt, buffered and flushed in batches to POST …/executions.
 

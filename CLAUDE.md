@@ -81,5 +81,4 @@ link + disable; no further work. Don't change these names/shape without asking.
 
 ## Build & publish
 - `pip install -e '.[dev]'` · `mypy` · `ruff check src` · smoke-test into a sample suite.
-- Versions: `0.1.0aN` until platform launch, then `0.1.0`; semver after. Bump the alpha on
-  each meaningful change. Publish: `python -m build && twine upload dist/*`.
+- **Never hand-edit this package's `version` (in `pyproject.toml`).** The GitHub build/release workflow auto-increments and publishes it; a manual bump collides with the release. Leave the version untouched in every change. (Consumers referencing this package still do so normally, just don't hand-bump *this* package's own version.)
