@@ -34,14 +34,14 @@ jobs:
     # Must match the environment named in the PyPI trusted-publisher config.
     environment: pypi
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # full history so the bump commit + tag push cleanly
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: pip
 
       # Validate BEFORE bumping/publishing anything.
