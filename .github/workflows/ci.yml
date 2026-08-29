@@ -15,13 +15,13 @@ jobs:
     name: lint + types + build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # mypy/ruff run on a modern Python; the package itself targets 3.8+ (ruff's
       # target-version in pyproject enforces 3.8-compatible syntax).
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: pip
 
       - name: Install (with dev extras)
